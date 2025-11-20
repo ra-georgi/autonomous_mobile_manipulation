@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<sdf version="1.10">
+  <model name="red_cylinder">
+    <!-- Pose of the model relative to the spawn pose -->
+    <pose>0 0 0 0 0 0</pose>
+
+    <link name="link">
+      <!-- Inertial properties for a solid cylinder -->
+      <inertial>
+        <mass>0.2</mass>
+        <inertia>
+          <!-- Ixx = Iyy = 2.85e-4, Izz = 9.0e-5 -->
+          <ixx>2.85e-4</ixx>
+          <iyy>2.85e-4</iyy>
+          <izz>9.0e-5</izz>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+        </inertia>
+      </inertial>
+
+      <!-- Collision geometry -->
+      <collision name="collision">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.03</radius>
+            <length>0.12</length>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+
+      <!-- Visual geometry -->
+      <visual name="visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.03</radius>
+            <length>0.12</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <!-- RGBA: full red, opaque -->
+          <ambient>1 0 0 1</ambient>
+          <diffuse>1 0 0 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+          <emissive>0 0 0 1</emissive>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

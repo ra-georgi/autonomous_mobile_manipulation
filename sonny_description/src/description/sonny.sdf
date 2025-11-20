@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.8" xmlns:xacro="http://ros.org/wiki/xacro">
-  <model name='sam_bot' canonical_link='base_link'>
+  <model name='sonny' canonical_link='base_link'>
 
     <!-- Define robot constants -->
     <xacro:property name="base_width" value="0.31"/>
