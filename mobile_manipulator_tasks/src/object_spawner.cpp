@@ -2,9 +2,9 @@
 #include <chrono>
 #include <cstdlib>  // for std::system
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <functional> 
 
 using namespace std::chrono_literals;
-// using ros_gz_interfaces::srv::SpawnEntity;
 
 namespace mobile_manipulator_tasks
 {
@@ -23,26 +23,18 @@ ObjectSpawnerNode::ObjectSpawnerNode(const rclcpp::NodeOptions & options): rclcp
   RCLCPP_INFO(get_logger(), "Red model path:   %s", red_model_path_.c_str());
   RCLCPP_INFO(get_logger(), "Green model path: %s", green_model_path_.c_str());
 
-  // // Create SpawnEntity client to Gazebo
-  // const std::string service_name = "/world/" + world_name_ + "/create";
-  // spawn_client_ = this->create_client<SpawnEntity>(service_name);
 
-  // RCLCPP_INFO(get_logger(), "Waiting for SpawnEntity service [%s] ...", service_name.c_str());
+  // Service: provide the next spawned object (one per call)
+  get_next_object_service_ =
+    this->create_service<mobile_manipulator_tasks::srv::GetNextObject>("get_next_object",
+      std::bind(
+        &ObjectSpawnerNode::handleGetNextObject,
+        this,
+        std::placeholders::_1,
+        std::placeholders::_2));
 
-  // // Wait until the service is available
-  // while (!spawn_client_->wait_for_service(1s) && rclcpp::ok()) 
-  // {
-  //   RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 5000,
-  //                        "Still waiting for service [%s] ...",
-  //                        service_name.c_str());
-  // }
+  RCLCPP_INFO(get_logger(), "Service 'get_next_object' ready.");
 
-  // if (!rclcpp::ok()) {
-  //   RCLCPP_ERROR(get_logger(), "ROS shutdown while waiting for SpawnEntity service.");
-  //   return;
-  // }
-
-  // RCLCPP_INFO(get_logger(), "SpawnEntity service is available.");
 
   // Build a simple spawn schedule (all times in *simulation* seconds)
   {
@@ -154,5 +146,42 @@ bool ObjectSpawnerNode::spawnEvent(const SpawnEvent & event)
 
   return true;
 }
+
+
+void ObjectSpawnerNode::handleGetNextObject(
+  const mobile_manipulator_tasks::srv::GetNextObject::Request::SharedPtr ,
+  mobile_manipulator_tasks::srv::GetNextObject::Response::SharedPtr response)
+{
+  // Default: no object available
+  response->success = false;
+
+  // Iterate schedule in order, find first spawned & not yet served
+  for (auto & event : schedule_) {
+    if (event.spawned && !event.served) {
+      // Fill response
+      mobile_manipulator_tasks::msg::SpawnedObject obj_msg;
+      obj_msg.name  = event.name;
+      obj_msg.color = event.color;
+      obj_msg.pose  = event.pose;
+
+      response->object  = obj_msg;
+      response->success = true;
+
+      // Mark as served so we don't return it again
+      event.served = true;
+
+      RCLCPP_INFO(get_logger(),
+                  "GetNextObject: returning '%s' (%s)",
+                  event.name.c_str(), event.color.c_str());
+      return;
+    }
+  }
+
+  // If we reach here, nothing was found
+  RCLCPP_DEBUG(get_logger(),
+               "GetNextObject: no new spawned objects available yet.");
+}
+
+
 
 } 

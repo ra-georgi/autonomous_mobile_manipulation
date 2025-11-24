@@ -9,12 +9,32 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
-# find_package(ros_gz_interfaces REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+find_package(behaviortree_cpp REQUIRED)
+
+
+
+set(MSG_FILES
+  "msg/SpawnedObject.msg"
+)
+
+set(SRV_FILES
+  "srv/GetNextObject.srv"
+)
+
 
 include_directories(
   include
 )
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${MSG_FILES}
+  ${SRV_FILES}
+  DEPENDENCIES geometry_msgs
+)
+
+
 
 add_library(mobile_manipulator_tasks_core
   src/object_spawner.cpp
@@ -23,9 +43,11 @@ add_library(mobile_manipulator_tasks_core
 ament_target_dependencies(mobile_manipulator_tasks_core
   rclcpp
   geometry_msgs
-  # ros_gz_interfaces
+  rosidl_default_runtime
   ament_index_cpp
 )
+
+
 
 add_executable(object_spawner_node
   src/object_spawner_node.cpp
@@ -40,11 +62,58 @@ ament_target_dependencies(object_spawner_node
   rclcpp
 )
 
+rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+target_link_libraries(mobile_manipulator_tasks_core "${cpp_typesupport_target}")
+
+
+add_library(get_next_object_bt_node SHARED
+  src/bt_nodes/get_next_object_bt_node.cpp
+)
+
+ament_target_dependencies(get_next_object_bt_node
+  behaviortree_cpp
+  rclcpp
+  geometry_msgs
+  rosidl_default_runtime
+)
+
+# Add generated interface include directories
+target_include_directories(get_next_object_bt_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp>
+)
+
+# Link ROSIDL generated typesupport
+rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+target_link_libraries(get_next_object_bt_node "${cpp_typesupport_target}")
+
+
+
+install(TARGETS
+  get_next_object_bt_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
+
+# install(TARGETS
+#   mobile_manipulator_tasks_core
+#   object_spawner_node
+#   DESTINATION lib/${PROJECT_NAME}
+# )
+
+# Install the library to lib/
 install(TARGETS
   mobile_manipulator_tasks_core
+  DESTINATION lib
+)
+
+# Install the executable to lib/<pkg> so ros2 run can find it
+install(TARGETS
   object_spawner_node
   DESTINATION lib/${PROJECT_NAME}
 )
+
+
 
 install(DIRECTORY models
   DESTINATION share/${PROJECT_NAME}
@@ -63,7 +132,11 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+ament_export_dependencies(rosidl_default_runtime)
+
 ament_package()
+
+
 
 
 
