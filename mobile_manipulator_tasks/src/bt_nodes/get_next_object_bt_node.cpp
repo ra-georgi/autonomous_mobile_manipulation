@@ -1,5 +1,8 @@
 #include "mobile_manipulator_tasks/bt_nodes/get_next_object_bt_node.hpp"
 #include <behaviortree_cpp/bt_factory.h>
+#include <chrono>
+using namespace std::chrono_literals;
+
 
 namespace mobile_manipulator_tasks
 {
@@ -23,33 +26,60 @@ BT::PortsList GetNextObjectBTNode::providedPorts()
   };
 }
 
+
 BT::NodeStatus GetNextObjectBTNode::tick()
 {
-  auto req = std::make_shared<mobile_manipulator_tasks::srv::GetNextObject::Request>();
-
-  auto future = client_->async_send_request(req);
-
-  // synchronous wait
-  auto status = future.wait_for(std::chrono::milliseconds(500));
-
-  if (status != std::future_status::ready) {
-    RCLCPP_ERROR(node_->get_logger(), "Service call timeout");
+  if (!rclcpp::ok()) {
     return BT::NodeStatus::FAILURE;
   }
 
-  auto resp = future.get();
-
-  if (!resp->success) {
-    // no new objects available
+  // 1) Make sure the service is available
+  if (!client_->wait_for_service(500ms)) {
+    RCLCPP_WARN(node_->get_logger(),
+                "Service /get_next_object not available");
     return BT::NodeStatus::FAILURE;
   }
 
-  // write to BT blackboard
-  setOutput("target_name", resp->object.name);
-  setOutput("target_pose", resp->object.pose);
+  // 2) Prepare request
+  auto request =
+      std::make_shared<mobile_manipulator_tasks::srv::GetNextObject::Request>();
+
+  // 3) Send request asynchronously
+  auto future = client_->async_send_request(request);
+
+  // 4) Spin this node until the future completes (or timeout)
+  auto result = rclcpp::spin_until_future_complete(
+      node_, future, 2s);
+
+  if (result != rclcpp::FutureReturnCode::SUCCESS) {
+    RCLCPP_ERROR(node_->get_logger(),
+                 "Service call to /get_next_object failed or timed out");
+    return BT::NodeStatus::FAILURE;
+  }
+
+  auto response = future.get();
+
+  // 5) No new objects case
+  if (!response->success) {
+    // No unserved spawned objects available
+    return BT::NodeStatus::FAILURE;
+  }
+
+  // 6) Write values to blackboard
+  setOutput("target_name", response->object.name);
+  setOutput("target_pose", response->object.pose);
 
   return BT::NodeStatus::SUCCESS;
 }
+
+
+
+
+
+
+
+
+
 
 }  // namespace mobile_manipulator_tasks
 

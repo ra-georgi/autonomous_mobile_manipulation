@@ -77,7 +77,7 @@ ament_target_dependencies(get_next_object_bt_node
   rosidl_default_runtime
 )
 
-# Add generated interface include directories
+# Add generated interface include directories     #is this required?
 target_include_directories(get_next_object_bt_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp>
 )
@@ -86,6 +86,44 @@ target_include_directories(get_next_object_bt_node PUBLIC
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
 target_link_libraries(get_next_object_bt_node "${cpp_typesupport_target}")
 
+target_compile_definitions(get_next_object_bt_node PRIVATE BT_PLUGIN_EXPORT)
+
+
+add_library(compute_base_goal_from_object_bt_node SHARED
+  src/bt_nodes/compute_base_goal_from_object.cpp
+)
+
+ament_target_dependencies(compute_base_goal_from_object_bt_node
+  behaviortree_cpp
+  rclcpp
+  geometry_msgs
+)
+
+# Export as BT plugin
+target_compile_definitions(compute_base_goal_from_object_bt_node PRIVATE BT_PLUGIN_EXPORT)
+
+install(TARGETS
+  compute_base_goal_from_object_bt_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
+
+add_executable(bt_test_runner src/bt_test_runner.cpp)
+ament_target_dependencies(bt_test_runner
+  behaviortree_cpp
+  rclcpp
+  geometry_msgs
+  ament_index_cpp
+)
+
+
+install(TARGETS bt_test_runner
+  DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY bt_xml
+  DESTINATION share/${PROJECT_NAME}
+)
 
 
 install(TARGETS
@@ -93,13 +131,6 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-
-
-# install(TARGETS
-#   mobile_manipulator_tasks_core
-#   object_spawner_node
-#   DESTINATION lib/${PROJECT_NAME}
-# )
 
 # Install the library to lib/
 install(TARGETS

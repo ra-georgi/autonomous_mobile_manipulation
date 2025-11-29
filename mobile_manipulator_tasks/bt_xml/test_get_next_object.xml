@@ -1,0 +1,8 @@
+<root main_tree_to_execute="MainTree" BTCPP_format="4">
+  <BehaviorTree ID="MainTree">
+    <Sequence>
+      <GetNextObject target_name="{obj_name}"
+                     target_pose="{obj_pose}" />
+    </Sequence>
+  </BehaviorTree>
+</root>
