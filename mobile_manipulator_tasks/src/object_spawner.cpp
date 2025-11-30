@@ -42,8 +42,8 @@ ObjectSpawnerNode::ObjectSpawnerNode(const rclcpp::NodeOptions & options): rclcp
     e1.spawn_time = 5.0;             // at sim time t=5s
     e1.color      = "red";
     e1.name       = "cyl_red_1";
-    e1.pose.position.x = 1.0;
-    e1.pose.position.y = 0.5;
+    e1.pose.position.x = 0.0;
+    e1.pose.position.y = -1.0;
     e1.pose.position.z = 0.06;       
     e1.pose.orientation.x = 0.0;
     e1.pose.orientation.y = 0.0;
@@ -57,8 +57,8 @@ ObjectSpawnerNode::ObjectSpawnerNode(const rclcpp::NodeOptions & options): rclcp
     e2.spawn_time = 10.0;           
     e2.color      = "green";
     e2.name       = "cyl_green_1";
-    e2.pose.position.x = 1.3;
-    e2.pose.position.y = 0.5;
+    e2.pose.position.x = 0.0;
+    e2.pose.position.y = -2.0;
     e2.pose.position.z = 0.06;
     e2.pose.orientation.x = 0.0;
     e2.pose.orientation.y = 0.0;
@@ -72,8 +72,8 @@ ObjectSpawnerNode::ObjectSpawnerNode(const rclcpp::NodeOptions & options): rclcp
     e3.spawn_time = 15.0;           
     e3.color      = "red";
     e3.name       = "cyl_red_2";
-    e3.pose.position.x = 1.6;
-    e3.pose.position.y = 0.5;
+    e3.pose.position.x = 0.0;
+    e3.pose.position.y = -2.5;
     e3.pose.position.z = 0.06;
     e3.pose.orientation.x = 0.0;
     e3.pose.orientation.y = 0.0;

@@ -12,6 +12,8 @@ find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(behaviortree_cpp REQUIRED)
+find_package(nav2_msgs REQUIRED)
+find_package(rclcpp_action REQUIRED)
 
 
 
@@ -106,6 +108,29 @@ install(TARGETS
   compute_base_goal_from_object_bt_node
   DESTINATION lib/${PROJECT_NAME}
 )
+
+
+
+add_library(navigate_to_pose_bt_node SHARED
+  src/bt_nodes/navigate_to_pose_bt_node.cpp
+)
+
+ament_target_dependencies(navigate_to_pose_bt_node
+  behaviortree_cpp
+  rclcpp
+  rclcpp_action
+  geometry_msgs
+  nav2_msgs
+)
+
+# Export as BT plugin
+target_compile_definitions(navigate_to_pose_bt_node PRIVATE BT_PLUGIN_EXPORT)
+
+install(TARGETS
+  navigate_to_pose_bt_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 
 
 

@@ -23,25 +23,26 @@ int main(int argc, char ** argv)
   // 2) Register plugin (.so) from install space
   const std::string pkg_prefix = ament_index_cpp::get_package_prefix("mobile_manipulator_tasks");
 
-  // const std::string plugin_path = pkg_prefix + "/lib/mobile_manipulator_tasks/libget_next_object_bt_node.so";
-  // std::cout << "Loading BT plugin: " << plugin_path << std::endl;
-  // factory.registerFromPlugin(plugin_path);
 
-  // GetNextObject plugin
+  // 1) GetNextObject plugin
   const std::string get_next_plugin = pkg_prefix + "/lib/mobile_manipulator_tasks/libget_next_object_bt_node.so";
-  std::cout << "Loading BT plugin: " << get_next_plugin << std::endl;
+  // std::cout << "Loading BT plugin: " << get_next_plugin << std::endl;
   factory.registerFromPlugin(get_next_plugin);
 
-  // ComputeBaseGoalFromObject plugin
+  // 2) ComputeBaseGoalFromObject plugin
   const std::string compute_goal_plugin = pkg_prefix + "/lib/mobile_manipulator_tasks/libcompute_base_goal_from_object_bt_node.so";
-  std::cout << "Loading BT plugin: " << compute_goal_plugin << std::endl;
   factory.registerFromPlugin(compute_goal_plugin);
 
+  // 3) NavigateToPoseBT plugin
+  const std::string nav_to_pose_plugin = pkg_prefix + "/lib/mobile_manipulator_tasks/libnavigate_to_pose_bt_node.so";
+  factory.registerFromPlugin(nav_to_pose_plugin);
+
+
   // 3) Load XML tree from share dir
-  const std::string pkg_share =
-      ament_index_cpp::get_package_share_directory("mobile_manipulator_tasks");
+  const std::string pkg_share = ament_index_cpp::get_package_share_directory("mobile_manipulator_tasks");
   // const std::string xml_path = pkg_share + "/bt_xml/test_get_next_object.xml";
-  const std::string xml_path = pkg_share + "/bt_xml/test_go_to_object.xml";
+  // const std::string xml_path = pkg_share + "/bt_xml/test_go_to_object.xml";
+  const std::string xml_path = pkg_share + "/bt_xml/go_to_object_nav.xml";
 
 
   std::cout << "Loading BT XML: " << xml_path << std::endl;
