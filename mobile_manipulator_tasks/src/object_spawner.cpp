@@ -39,7 +39,7 @@ ObjectSpawnerNode::ObjectSpawnerNode(const rclcpp::NodeOptions & options): rclcp
   // Build a simple spawn schedule (all times in *simulation* seconds)
   {
     SpawnEvent e1;
-    e1.spawn_time = 5.0;             // at sim time t=5s
+    e1.spawn_time = 30.0;             // at sim time t=5s
     e1.color      = "red";
     e1.name       = "cyl_red_1";
     e1.pose.position.x = 0.0;
@@ -54,7 +54,7 @@ ObjectSpawnerNode::ObjectSpawnerNode(const rclcpp::NodeOptions & options): rclcp
 
   {
     SpawnEvent e2;
-    e2.spawn_time = 10.0;           
+    e2.spawn_time = 40.0;           
     e2.color      = "green";
     e2.name       = "cyl_green_1";
     e2.pose.position.x = 0.0;
@@ -69,7 +69,7 @@ ObjectSpawnerNode::ObjectSpawnerNode(const rclcpp::NodeOptions & options): rclcp
 
   {
     SpawnEvent e3;
-    e3.spawn_time = 15.0;           
+    e3.spawn_time = 50.0;           
     e3.color      = "red";
     e3.name       = "cyl_red_2";
     e3.pose.position.x = 0.0;
