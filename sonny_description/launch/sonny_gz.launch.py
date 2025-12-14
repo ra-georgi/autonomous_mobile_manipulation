@@ -8,16 +8,13 @@ from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
 from ros_gz_bridge.actions import RosGzBridge
 from ros_gz_sim.actions import GzServer
-from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     pkg_share = get_package_share_directory('sonny_description')
     ros_gz_sim_share = get_package_share_directory('ros_gz_sim')
     gz_spawn_model_launch_source = os.path.join(ros_gz_sim_share, "launch", "gz_spawn_model.launch.py")
-
-    default_model_path = os.path.join(pkg_share, 'urdf', 'sonny_base.urdf.xacro')
-    # default_model_path = os.path.join(pkg_share, 'src', 'description', 'sonny_panda.sdf')
-
+    # default_model_path = os.path.join(pkg_share, 'src', 'description', 'sonny.sdf')
+    default_model_path = os.path.join(pkg_share, 'urdf', 'sonny_main.urdf.xacro')
     default_rviz_config_path = os.path.join(pkg_share, 'rviz', 'config.rviz')
     world_path = os.path.join(pkg_share, 'world', 'indoor_world.sdf')
     bridge_config_path = os.path.join(pkg_share, 'config', 'bridge_config.yaml')
@@ -28,19 +25,21 @@ def generate_launch_description():
     #     parameters=[{'robot_description': Command(['xacro ', LaunchConfiguration('model')])}, {'use_sim_time': LaunchConfiguration('use_sim_time')}]
     # )
 
+    # URDF file
+    urdf_file = os.path.join(pkg_share, 'urdf', 'sonny_main.urdf')
+    
+    with open(urdf_file, 'r') as infp:
+        robot_desc = infp.read()
+
+    # Robot State Publisher
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
+        name='robot_state_publisher',
         output='screen',
         parameters=[{
-            'robot_description': ParameterValue(
-                Command([
-                    'xacro ',
-                    LaunchConfiguration('model')
-                ]),
-                value_type=str
-            ),
-            'use_sim_time': LaunchConfiguration('use_sim_time')
+            'robot_description': robot_desc,
+            'use_sim_time': True
         }]
     )
 
@@ -67,10 +66,10 @@ def generate_launch_description():
     spawn_entity = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(gz_spawn_model_launch_source),
         launch_arguments={
-            'world': 'my_world',
+            # 'world': 'my_world',
             'topic': '/robot_description',
             'entity_name': 'sonny',
-            'z': '0.65',
+            'z': '0.55',
         }.items(),
     )
 
@@ -81,6 +80,7 @@ def generate_launch_description():
         output='screen',
         parameters=[os.path.join(pkg_share, 'config/ekf.yaml'), {'use_sim_time': LaunchConfiguration('use_sim_time')}]
     )
+
 
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
@@ -101,15 +101,9 @@ def generate_launch_description():
         executable="spawner",
         arguments=["panda_hand_controller"],
         output="screen",
-        condition=None,  # remove or adjust if you want to gate this
-    )    
-
-    diff_drive_base_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["diff_drive_base_controller"],
-        output="screen",
+        condition=None,  
     )
+
 
     return LaunchDescription([
         DeclareLaunchArgument(name='use_sim_time', default_value='True', description='Flag to enable use_sim_time'),
@@ -124,6 +118,5 @@ def generate_launch_description():
         spawn_entity,
         joint_state_broadcaster_spawner,
         panda_arm_controller_spawner,
-        panda_hand_controller_spawner,
-
+        panda_hand_controller_spawner,        
     ])

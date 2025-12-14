@@ -18,8 +18,8 @@ def generate_launch_description():
     nav2_params = LaunchConfiguration('params_file')
 
     declare_use_sim_time = DeclareLaunchArgument('use_sim_time', default_value='true')
-    declare_map = DeclareLaunchArgument('map', default_value='',description='Full path to map.yaml')
-    declare_params = DeclareLaunchArgument('params_file', default_value='',description='Full path to Nav2 params file')
+    declare_map = DeclareLaunchArgument('map', default_value='/home/reuben/moveit_ws/src/sonny_description/maps/my_world_map.yaml',description='Full path to map.yaml')
+    declare_params = DeclareLaunchArgument('params_file', default_value='/home/reuben/moveit_ws/src/sonny_description/config/nav2_params.yaml',description='Full path to Nav2 params file')
 
     # ---------------------------------------------------------
     # Object Spawner 
@@ -86,5 +86,5 @@ def generate_launch_description():
         spawner_node,
         nav2_bringup,
         nav2_rviz,
-        bt_task_runner,
+        # bt_task_runner,
     ])

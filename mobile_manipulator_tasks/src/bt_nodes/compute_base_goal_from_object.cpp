@@ -42,7 +42,7 @@ BT::NodeStatus ComputeBaseGoalFromObject::tick()
   }
 
   // Position: same x,y as object, z = 0 (ground)
-  goal.pose.position.x = object_pose.position.x;
+  goal.pose.position.x = (object_pose.position.x) - 1;
   goal.pose.position.y = object_pose.position.y;
   goal.pose.position.z = 0.0;
 

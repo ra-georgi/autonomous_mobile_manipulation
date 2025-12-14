@@ -1,0 +1,82 @@
+# This config file is used by ros2_control
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    panda_arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    panda_hand_controller:
+      type: position_controllers/GripperActionController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    # diff_drive_base_controller:
+    #   type: diff_drive_controller/DiffDriveController
+
+
+panda_arm_controller:
+  ros__parameters:
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+    joints:
+      - panda_joint1
+      - panda_joint2
+      - panda_joint3
+      - panda_joint4
+      - panda_joint5
+      - panda_joint6
+      - panda_joint7
+    allow_nonzero_velocity_at_trajectory_end: true
+
+panda_hand_controller:
+  ros__parameters:
+    joint: panda_finger_joint1
+
+
+# diff_drive_base_controller:
+#   ros__parameters:
+#     # Joints must match your URDF names
+#     left_wheel_names:  ["drivewhl_l_joint"]
+#     right_wheel_names: ["drivewhl_r_joint"]
+
+#     # Kinematics 
+#     wheel_separation: 0.4          
+#     wheel_radius: 0.1             
+
+#     # Frames
+#     base_frame_id: base_link
+#     odom_frame_id: odom
+
+#     # Topic to listen for velocity commands
+#     cmd_vel_timeout: 0.25
+#     use_stamped_vel: false
+#     publish_limited_velocity: true
+#     enable_odom_tf: true           # publishes odom->base_link TF
+
+#     # Velocity limits
+#     linear:
+#       x:
+#         has_velocity_limits: true
+#         max_velocity: 0.5          # m/s
+#         min_velocity: -0.5
+#         has_acceleration_limits: true
+#         max_acceleration: 1.0      # m/s^2
+#         min_acceleration: -1.0
+
+#     angular:
+#       z:
+#         has_velocity_limits: true
+#         max_velocity: 1.2          # rad/s
+#         min_velocity: -1.2
+#         has_acceleration_limits: true
+#         max_acceleration: 2.0      # rad/s^2
+#         min_acceleration: -2.0
+
+#     # Input topic (what teleop/Nav2 should publish to)
+#     cmd_vel_topic: /demo/cmd_vel
+#     odom_topic: /demo/odom

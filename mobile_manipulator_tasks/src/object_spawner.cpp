@@ -40,11 +40,11 @@ ObjectSpawnerNode::ObjectSpawnerNode(const rclcpp::NodeOptions & options): rclcp
   {
     SpawnEvent e1;
     e1.spawn_time = 30.0;             // at sim time t=5s
-    e1.color      = "red";
-    e1.name       = "cyl_red_1";
-    e1.pose.position.x = 0.0;
-    e1.pose.position.y = -1.0;
-    e1.pose.position.z = 0.06;       
+    e1.color      = "green";
+    e1.name       = "cyl_green_1";
+    e1.pose.position.x = 1.0;
+    e1.pose.position.y = 1.0;
+    e1.pose.position.z = 0.56;       
     e1.pose.orientation.x = 0.0;
     e1.pose.orientation.y = 0.0;
     e1.pose.orientation.z = 0.0;
@@ -52,35 +52,51 @@ ObjectSpawnerNode::ObjectSpawnerNode(const rclcpp::NodeOptions & options): rclcp
     schedule_.push_back(e1);
   }
 
-  {
-    SpawnEvent e2;
-    e2.spawn_time = 40.0;           
-    e2.color      = "green";
-    e2.name       = "cyl_green_1";
-    e2.pose.position.x = 0.0;
-    e2.pose.position.y = -2.0;
-    e2.pose.position.z = 0.06;
-    e2.pose.orientation.x = 0.0;
-    e2.pose.orientation.y = 0.0;
-    e2.pose.orientation.z = 0.0;
-    e2.pose.orientation.w = 1.0;
-    schedule_.push_back(e2);
-  }
+  // {
+  //   SpawnEvent e2;
+  //   e2.spawn_time = 40.0;           
+  //   e2.color      = "green";
+  //   e2.name       = "cyl_green_2";
+  //   e2.pose.position.x = 1.0;
+  //   e2.pose.position.y = -1.0;
+  //   e2.pose.position.z = 0.56;
+  //   e2.pose.orientation.x = 0.0;
+  //   e2.pose.orientation.y = 0.0;
+  //   e2.pose.orientation.z = 0.0;
+  //   e2.pose.orientation.w = 1.0;
+  //   schedule_.push_back(e2);
+  // }
 
-  {
-    SpawnEvent e3;
-    e3.spawn_time = 50.0;           
-    e3.color      = "red";
-    e3.name       = "cyl_red_2";
-    e3.pose.position.x = 0.0;
-    e3.pose.position.y = -2.5;
-    e3.pose.position.z = 0.06;
-    e3.pose.orientation.x = 0.0;
-    e3.pose.orientation.y = 0.0;
-    e3.pose.orientation.z = 0.0;
-    e3.pose.orientation.w = 1.0;
-    schedule_.push_back(e3);
-  }
+  // {
+  //   SpawnEvent e3;
+  //   e3.spawn_time = 50.0;           
+  //   e3.color      = "red";
+  //   e3.name       = "cyl_red_1";
+  //   e3.pose.position.x = -1.5;
+  //   e3.pose.position.y = 1.5;
+  //   e3.pose.position.z = 0.56;
+  //   e3.pose.orientation.x = 0.0;
+  //   e3.pose.orientation.y = 0.0;
+  //   e3.pose.orientation.z = 0.0;
+  //   e3.pose.orientation.w = 1.0;
+  //   schedule_.push_back(e3);
+  // }
+
+  // {
+  //   SpawnEvent e4;
+  //   e4.spawn_time = 60.0;           
+  //   e4.color      = "green";
+  //   e4.name       = "cyl_green_3";
+  //   e4.pose.position.x = -1.5;
+  //   e4.pose.position.y = -1.5;
+  //   e4.pose.position.z = 0.56;
+  //   e4.pose.orientation.x = 0.0;
+  //   e4.pose.orientation.y = 0.0;
+  //   e4.pose.orientation.z = 0.0;
+  //   e4.pose.orientation.w = 1.0;
+  //   schedule_.push_back(e4);
+  // }
+
 
   // Timer: check schedule at 10 Hz
   timer_ = this->create_wall_timer(100ms, std::bind(&ObjectSpawnerNode::timerCallback, this));
@@ -123,7 +139,7 @@ bool ObjectSpawnerNode::spawnEvent(const SpawnEvent & event)
 
   const auto & p = event.pose.position;
 
-  // Build the command. We only use position (no roll/pitch/yaw for now).
+  // Build the command. We only use position 
   std::stringstream cmd;
   cmd << "ros2 run ros_gz_sim create"
       << " -world " << world_name_

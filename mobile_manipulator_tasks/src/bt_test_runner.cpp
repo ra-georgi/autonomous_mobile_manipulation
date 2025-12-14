@@ -62,11 +62,8 @@ int main(int argc, char ** argv)
     {
       std::string name;
       geometry_msgs::msg::Pose pose;
-
       geometry_msgs::msg::PoseStamped nav_goal;
       bool ok_nav = tree.rootBlackboard()->get("nav_goal", nav_goal);
-
-
       bool ok_name = tree.rootBlackboard()->get("obj_name", name);
       bool ok_pose = tree.rootBlackboard()->get("obj_pose", pose);
 

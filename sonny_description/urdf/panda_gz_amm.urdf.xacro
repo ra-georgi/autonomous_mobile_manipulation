@@ -1,21 +1,20 @@
-<?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+<?xml version="1.0" ?>
 
-  <!-- Macro that adds the Panda arm + its ros2_control and mounts it to any parent link -->
-  <xacro:macro name="add_panda_arm" params="parent_link base_xyz:='0 0 0' base_rpy:='0 0 0'">
+<robot name="panda" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <xacro:include filename="$(find moveit_resources_panda_description)/urdf/panda.urdf.xacro" />
 
-    <!-- Fixed joint from parent link to panda_link0 -->
-    <joint name="panda_on_${parent_link}" type="fixed">
-      <parent link="${parent_link}"/>
+    <xacro:property name="mob_base_height" value="0.18"/>
+
+    <!-- Fixed joint from your parent link to panda_link0 -->
+    <joint name="panda_on_base_link" type="fixed">
+      <parent link="base_link"/>
       <child  link="panda_link0"/>
-      <origin xyz="${base_xyz}" rpy="${base_rpy}"/>
+      <origin xyz="0.0 0 ${mob_base_height/2}" rpy="0 0 0"/>
     </joint>
 
     <gazebo>
       <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-        <!-- <parameters>/home/reuben/moveit_ws/src/sonny_description/config/ros2_controllers.yaml</parameters> -->
         <parameters>/home/reuben/moveit_ws/src/panda_moveit_config/config/ros2_controllers.yaml</parameters>
       </plugin>
     </gazebo>
@@ -84,6 +83,6 @@
     
     </ros2_control>
 
-  </xacro:macro>
+
 
 </robot>
