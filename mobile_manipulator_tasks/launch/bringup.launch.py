@@ -65,7 +65,7 @@ def generate_launch_description():
     )
 
     # ---------------------------------------------------------
-    # Your BT Task Runner
+    # BT Task Runner
     # ---------------------------------------------------------
     bt_task_runner = Node(
         package='mobile_manipulator_tasks',

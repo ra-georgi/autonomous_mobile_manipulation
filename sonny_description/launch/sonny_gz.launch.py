@@ -9,15 +9,24 @@ from launch_ros.actions import Node
 from ros_gz_bridge.actions import RosGzBridge
 from ros_gz_sim.actions import GzServer
 
+from moveit_configs_utils import MoveItConfigsBuilder
+
 def generate_launch_description():
     pkg_share = get_package_share_directory('sonny_description')
     ros_gz_sim_share = get_package_share_directory('ros_gz_sim')
+    moveit_config_share = get_package_share_directory('moveit_resources_panda_moveit_config')
+
+    
     gz_spawn_model_launch_source = os.path.join(ros_gz_sim_share, "launch", "gz_spawn_model.launch.py")
     # default_model_path = os.path.join(pkg_share, 'src', 'description', 'sonny.sdf')
     default_model_path = os.path.join(pkg_share, 'urdf', 'sonny_main.urdf.xacro')
-    default_rviz_config_path = os.path.join(pkg_share, 'rviz', 'config.rviz')
+    
+    default_rviz_config_path = os.path.join(pkg_share, 'rviz', 'moveit.rviz')
+
     world_path = os.path.join(pkg_share, 'world', 'indoor_world.sdf')
     bridge_config_path = os.path.join(pkg_share, 'config', 'bridge_config.yaml')
+
+    robot_controllers = os.path.join(moveit_config_share, 'config', 'ros2_controllers.yaml')
 
     # robot_state_publisher_node = Node(
     #     package='robot_state_publisher',
@@ -92,17 +101,44 @@ def generate_launch_description():
     panda_arm_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["panda_arm_controller"],
+        arguments=["panda_arm_controller", "--param-file", robot_controllers],
         output="screen",
     )
 
     panda_hand_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["panda_hand_controller"],
+        arguments=["panda_hand_controller", "--param-file", robot_controllers],
         output="screen",
         condition=None,  
     )
+
+
+    # Load the robot configuration
+    moveit_config = (
+        MoveItConfigsBuilder("panda", package_name="moveit_resources_panda_moveit_config"
+        )
+        .robot_description(file_path=urdf_file
+        )
+        .trajectory_execution(file_path="config/moveit_controllers.yaml")
+        # .kinematics(file_path="config/kinematics.yaml")  # Add this line
+        .planning_scene_monitor(
+            publish_robot_description=True, publish_robot_description_semantic=True
+        )
+        .planning_pipelines(
+            pipelines=["ompl"]
+            # pipelines=["ompl", "stomp", "pilz_industrial_motion_planner"]
+        )
+        .to_moveit_configs()
+    )    
+
+    run_move_group_node = Node(
+        package="moveit_ros_move_group",
+        executable="move_group",
+        output="screen",
+        parameters=[moveit_config.to_dict(),    {"use_sim_time": True},],
+        # parameters=[moveit_config.to_dict(),{'use_sim_time': use_sim_time,}],
+    )    
 
 
     return LaunchDescription([
@@ -119,4 +155,5 @@ def generate_launch_description():
         joint_state_broadcaster_spawner,
         panda_arm_controller_spawner,
         panda_hand_controller_spawner,        
+        run_move_group_node
     ])
