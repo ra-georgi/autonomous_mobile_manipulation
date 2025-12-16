@@ -143,6 +143,66 @@ ament_target_dependencies(bt_test_runner
 )
 
 
+
+
+
+
+# Gazebo (gz) deps (Harmonic commonly uses transport13, msgs10)
+find_package(gz-transport13 QUIET)
+find_package(gz-msgs10 QUIET)
+
+if(NOT gz-transport13_FOUND)
+  find_package(gz-transport12 QUIET)
+endif()
+if(NOT gz-msgs10_FOUND)
+  find_package(gz-msgs9 QUIET)
+endif()
+
+# Fail loudly if none found
+if(NOT (gz-transport13_FOUND OR gz-transport12_FOUND))
+  message(FATAL_ERROR "Could not find gz-transport (tried gz-transport13, gz-transport12)")
+endif()
+if(NOT (gz-msgs10_FOUND OR gz-msgs9_FOUND))
+  message(FATAL_ERROR "Could not find gz-msgs (tried gz-msgs10, gz-msgs9)")
+endif()
+
+
+add_library(get_gazebo_model_pose_bt_node SHARED
+  src/bt_nodes/get_gazebo_model_pose_bt_node.cpp
+)
+
+ament_target_dependencies(get_gazebo_model_pose_bt_node
+  behaviortree_cpp
+  rclcpp
+  geometry_msgs
+)
+
+# Link gz libraries (choose whichever version was found)
+if(gz-transport13_FOUND)
+  target_link_libraries(get_gazebo_model_pose_bt_node gz-transport13::core)
+elseif(gz-transport12_FOUND)
+  target_link_libraries(get_gazebo_model_pose_bt_node gz-transport12::core)
+endif()
+
+if(gz-msgs10_FOUND)
+  target_link_libraries(get_gazebo_model_pose_bt_node gz-msgs10::gz-msgs10)
+elseif(gz-msgs9_FOUND)
+  target_link_libraries(get_gazebo_model_pose_bt_node gz-msgs9::gz-msgs9)
+endif()
+
+# Export as BT plugin
+target_compile_definitions(get_gazebo_model_pose_bt_node PRIVATE BT_PLUGIN_EXPORT)
+
+install(TARGETS
+  get_gazebo_model_pose_bt_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
+
+
+
+
 install(TARGETS bt_test_runner
   DESTINATION lib/${PROJECT_NAME})
 
