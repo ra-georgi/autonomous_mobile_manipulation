@@ -1,13 +1,12 @@
 #pragma once
 
-#include <atomic>
-#include <mutex>
-#include <string>
-#include <unordered_map>
-
 #include <behaviortree_cpp/action_node.h>
 #include <geometry_msgs/msg/pose.hpp>
 #include <rclcpp/rclcpp.hpp>
+
+#include <condition_variable>
+#include <mutex>
+#include <string>
 
 // Gazebo Transport + Msgs
 #include <gz/transport/Node.hh>
@@ -16,26 +15,31 @@
 namespace mobile_manipulator_tasks
 {
 
-class GetGazeboModelPoseBT : public BT::SyncActionNode
+class GetPoseGroundTruthBT : public BT::SyncActionNode
 {
 public:
-  GetGazeboModelPoseBT(const std::string& name, const BT::NodeConfiguration& config);
+  GetPoseGroundTruthBT(const std::string& name, const BT::NodeConfiguration& config);
   static BT::PortsList providedPorts();
   BT::NodeStatus tick() override;
 
 private:
-  void ensureSubscribed(const std::string& world_name);
   void onPoseInfo(const gz::msgs::Pose_V& msg);
+  static geometry_msgs::msg::Pose toRosPose(const gz::msgs::Pose& p);
+
+  static constexpr const char* kWorldName = "my_world";
+  static constexpr const char* kModelName = "sonny";
+  static constexpr int kTimeoutMs = 2000;
 
   rclcpp::Node::SharedPtr node_;
-
   gz::transport::Node gz_node_;
-  std::atomic<bool> subscribed_{false};
-  std::string subscribed_world_;
-  std::string pose_topic_;
 
-  std::mutex cache_mutex_;
-  std::unordered_map<std::string, geometry_msgs::msg::Pose> pose_cache_;
+  // Synchronization between callback and tick()
+  std::mutex mtx_;
+  std::condition_variable cv_;
+
+  geometry_msgs::msg::Pose latest_pose_{};
+  uint64_t latest_seq_{0};        
+  bool subscribed_{false};
 };
 
-}  
+} 

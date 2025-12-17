@@ -14,7 +14,11 @@ find_package(ament_index_cpp REQUIRED)
 find_package(behaviortree_cpp REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
-
+find_package(moveit_ros_planning_interface REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(control_msgs REQUIRED)
 
 
 set(MSG_FILES
@@ -197,6 +201,34 @@ install(TARGETS
   get_gazebo_model_pose_bt_node
   DESTINATION lib/${PROJECT_NAME}
 )
+
+
+
+
+add_library(pick_object_bt_node SHARED
+  src/bt_nodes/pick_object_bt_node.cpp
+)
+
+ament_target_dependencies(pick_object_bt_node
+  behaviortree_cpp
+  rclcpp
+  geometry_msgs
+  rclcpp_action
+  control_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  moveit_ros_planning_interface
+)
+
+target_compile_definitions(pick_object_bt_node PRIVATE BT_PLUGIN_EXPORT)
+
+install(TARGETS
+  pick_object_bt_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
 
 
 

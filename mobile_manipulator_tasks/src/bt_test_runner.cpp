@@ -37,12 +37,18 @@ int main(int argc, char ** argv)
   const std::string nav_to_pose_plugin = pkg_prefix + "/lib/mobile_manipulator_tasks/libnavigate_to_pose_bt_node.so";
   factory.registerFromPlugin(nav_to_pose_plugin);
 
+  const std::string gz_pose_plugin = pkg_prefix + "/lib/mobile_manipulator_tasks/libget_gazebo_model_pose_bt_node.so";
+  factory.registerFromPlugin(gz_pose_plugin);
+
+  const std::string pick_obj_plugin = pkg_prefix + "/lib/mobile_manipulator_tasks/libpick_object_bt_node.so";
+  factory.registerFromPlugin(pick_obj_plugin);
 
   // 3) Load XML tree from share dir
   const std::string pkg_share = ament_index_cpp::get_package_share_directory("mobile_manipulator_tasks");
   // const std::string xml_path = pkg_share + "/bt_xml/test_get_next_object.xml";
   // const std::string xml_path = pkg_share + "/bt_xml/test_go_to_object.xml";
   const std::string xml_path = pkg_share + "/bt_xml/go_to_object_nav.xml";
+  // const std::string xml_path = pkg_share + "/bt_xml/test_get_gz_pose.xml";
 
 
   std::cout << "Loading BT XML: " << xml_path << std::endl;

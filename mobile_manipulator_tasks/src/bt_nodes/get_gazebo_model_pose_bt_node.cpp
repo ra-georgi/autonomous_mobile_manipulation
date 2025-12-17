@@ -1,11 +1,12 @@
 #include "mobile_manipulator_tasks/bt_nodes/get_gazebo_model_pose_bt_node.hpp"
 
 #include <behaviortree_cpp/bt_factory.h>
+#include <chrono>
 
 namespace mobile_manipulator_tasks
 {
 
-static geometry_msgs::msg::Pose toRosPose(const gz::msgs::Pose& p)
+geometry_msgs::msg::Pose GetPoseGroundTruthBT::toRosPose(const gz::msgs::Pose& p)
 {
   geometry_msgs::msg::Pose out;
   out.position.x = p.position().x();
@@ -18,111 +19,94 @@ static geometry_msgs::msg::Pose toRosPose(const gz::msgs::Pose& p)
   return out;
 }
 
-GetGazeboModelPoseBT::GetGazeboModelPoseBT(
-    const std::string& name,
-    const BT::NodeConfiguration& config)
-  : BT::SyncActionNode(name, config)
+GetPoseGroundTruthBT::GetPoseGroundTruthBT(const std::string& name, const BT::NodeConfiguration& config): BT::SyncActionNode(name, config)
 {
-  node_ = rclcpp::Node::make_shared("get_gazebo_model_pose_bt_node");
-}
+  rclcpp::NodeOptions opts;
+  opts.automatically_declare_parameters_from_overrides(true);
+  opts.parameter_overrides({rclcpp::Parameter("use_sim_time", true)});
+  node_ = rclcpp::Node::make_shared("get_sonny_pose_ground_truth_bt_node", opts);
+  const std::string topic = std::string("/world/") + kWorldName + "/pose/info";
 
-BT::PortsList GetGazeboModelPoseBT::providedPorts()
-{
-  return {
-    // Which model/entity name to look up (e.g. "cyl_red_1")
-    BT::InputPort<std::string>("model_name"),
+  subscribed_ = gz_node_.Subscribe(topic, &GetPoseGroundTruthBT::onPoseInfo, this);
 
-    // World name to subscribe to (default "my_world" if not provided)
-    BT::InputPort<std::string>("world_name"),
-
-    // Output pose in world coordinates
-    BT::OutputPort<geometry_msgs::msg::Pose>("model_pose")
-  };
-}
-
-void GetGazeboModelPoseBT::ensureSubscribed(const std::string& world_name)
-{
-  if (subscribed_) {
-    return;
+  if (subscribed_) 
+  {
+    RCLCPP_INFO(node_->get_logger(), "Subscribed to Gazebo ground-truth pose topic: %s (model=%s)", topic.c_str(), kModelName);
+  } 
+  else 
+  {
+    RCLCPP_ERROR(node_->get_logger(), "Failed to subscribe to Gazebo pose topic: %s", topic.c_str());
   }
-
-  subscribed_world_ = world_name;
-  pose_topic_ = "/world/" + subscribed_world_ + "/pose/info";
-
-  bool ok = gz_node_.Subscribe(
-      pose_topic_,
-      &GetGazeboModelPoseBT::onPoseInfo,
-      this);
-
-  if (!ok) {
-    RCLCPP_ERROR(node_->get_logger(),
-                 "Failed to subscribe to Gazebo pose topic: %s",
-                 pose_topic_.c_str());
-    subscribed_ = false;
-    return;
-  }
-
-  subscribed_ = true;
-  RCLCPP_INFO(node_->get_logger(),
-              "Subscribed to Gazebo pose topic: %s",
-              pose_topic_.c_str());
 }
 
-void GetGazeboModelPoseBT::onPoseInfo(const gz::msgs::Pose_V& msg)
+BT::PortsList GetPoseGroundTruthBT::providedPorts()
 {
-  std::lock_guard<std::mutex> lock(cache_mutex_);
+  return {BT::OutputPort<geometry_msgs::msg::Pose>("model_pose")};
+}
 
-  // Update cache with latest pose for each entity name
+void GetPoseGroundTruthBT::onPoseInfo(const gz::msgs::Pose_V& msg)
+{
+  // Find the pose entry 
   for (int i = 0; i < msg.pose_size(); ++i) {
     const auto& pose = msg.pose(i);
 
-    // Entity name (Gazebo uses this to identify models/links)
-    const std::string& name = pose.name();
-    if (name.empty()) {
-      continue;
+    // IMPORTANT: the name field must match exactly what Gazebo publishes.
+    if (pose.name() == kModelName) {
+      std::lock_guard<std::mutex> lock(mtx_);
+      latest_pose_ = toRosPose(pose);
+      latest_seq_++;
+      cv_.notify_all();
+      return;
     }
-
-    pose_cache_[name] = toRosPose(pose);
   }
 }
 
-BT::NodeStatus GetGazeboModelPoseBT::tick()
+BT::NodeStatus GetPoseGroundTruthBT::tick()
 {
-  // Subscribe lazily on first tick so XML can provide world_name
-  std::string world_name = "my_world";
-  (void)getInput<std::string>("world_name", world_name);
-  ensureSubscribed(world_name);
-
-  if (!subscribed_) {
-    return BT::NodeStatus::FAILURE;
-  }
-
-  std::string model_name;
-  if (!getInput<std::string>("model_name", model_name)) {
-    RCLCPP_ERROR(node_->get_logger(),
-                 "GetGazeboModelPoseBT: missing required input [model_name]");
-    return BT::NodeStatus::FAILURE;
-  }
-
-  geometry_msgs::msg::Pose pose_out;
+  if (!subscribed_) 
   {
-    std::lock_guard<std::mutex> lock(cache_mutex_);
-    auto it = pose_cache_.find(model_name);
-    if (it == pose_cache_.end()) {
-      // Not seen yet (model may not exist/spawned)
-      return BT::NodeStatus::FAILURE;
-    }
-    pose_out = it->second;
+    return BT::NodeStatus::FAILURE;
   }
 
-  setOutput("model_pose", pose_out);
+  // Want a *fresh* sample that arrives after this tick starts.
+  uint64_t start_seq;
+  {
+    std::lock_guard<std::mutex> lock(mtx_);
+    start_seq = latest_seq_;
+  }
+
+  std::unique_lock<std::mutex> lock(mtx_);
+  const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(kTimeoutMs);
+
+  const bool got_fresh = cv_.wait_until(lock, deadline, [&]() {
+    return latest_seq_ > start_seq;
+  });
+
+  if (!got_fresh) {
+    RCLCPP_WARN(node_->get_logger(), "Timeout waiting for fresh Gazebo ground-truth pose for '%s' (world=%s). "
+                "Make sure pose topic is publishing and model name matches.", kModelName, kWorldName);
+    return BT::NodeStatus::FAILURE;
+  }
+
+  setOutput("model_pose", latest_pose_);
+  RCLCPP_INFO(node_->get_logger(), "GZ ground-truth pose | "
+    "pos: [%.3f, %.3f, %.3f] | "
+    "quat: [%.3f, %.3f, %.3f, %.3f]",
+    latest_pose_.position.x,
+    latest_pose_.position.y,
+    latest_pose_.position.z,
+    latest_pose_.orientation.x,
+    latest_pose_.orientation.y,
+    latest_pose_.orientation.z,
+    latest_pose_.orientation.w
+  );
+  
   return BT::NodeStatus::SUCCESS;
 }
 
-}  // namespace mobile_manipulator_tasks
+}  
 
 BT_REGISTER_NODES(factory)
 {
-  factory.registerNodeType<mobile_manipulator_tasks::GetGazeboModelPoseBT>(
-      "GetGazeboModelPose");
+  factory.registerNodeType<mobile_manipulator_tasks::GetPoseGroundTruthBT>("GetPoseGroundTruth");
 }

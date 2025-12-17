@@ -11,6 +11,12 @@
       <!-- 3) Use Nav2 via NavigateToPoseBT -->
       <NavigateToPoseBT goal="{nav_goal}" />
 
+      <!-- 4) (Will be perception node) Get position of base -->
+      <GetPoseGroundTruth model_pose="{sonny_pose}" />
+
+      <!-- 5) Pick object with moveit2 -->
+      <PickObjectNode object_pose="{obj_pose}" base_pose="{sonny_pose}" />
+
     </Sequence>
   </BehaviorTree>
 </root>
