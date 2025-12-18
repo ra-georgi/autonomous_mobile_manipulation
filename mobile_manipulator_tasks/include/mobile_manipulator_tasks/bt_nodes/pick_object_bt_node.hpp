@@ -31,16 +31,16 @@ private:
 
   // These must match your robot frames in TF/URDF
   static constexpr const char* kBaseLink = "base_link";
-  static constexpr const char* kArmBase  = "panda_link0";  
-//   static constexpr const char* kArmBase  = "base_link";
+  // static constexpr const char* kArmBase  = "panda_link0";  
+  static constexpr const char* kArmBase  = "base_link";
 
   // Gripper action name (common for GripperCommandController)
   static constexpr const char* kGripperAction = "/panda_hand_controller/gripper_cmd";
 
   // Motion parameters
-  static constexpr double kPreZ   = 0.15;  // meters above object
-  static constexpr double kGraspZ = 0.02;  // meters above object when closing
-  static constexpr double kLiftZ  = 0.20;  // meters above object after lift
+  static constexpr double kPreZ   = 0.21;  // meters above object
+  static constexpr double kGraspZ = 0.12;  // meters above object when closing
+  static constexpr double kLiftZ  = 0.21;  // meters above object after lift
 
   static constexpr double kVelScale = 0.3;
   static constexpr double kAccScale = 0.3;

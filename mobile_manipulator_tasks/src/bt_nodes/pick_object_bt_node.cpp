@@ -2,6 +2,7 @@
 #include <behaviortree_cpp/bt_factory.h>
 #include <chrono>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <map>
 
 using namespace std::chrono_literals;
 
@@ -106,6 +107,41 @@ BT::NodeStatus PickObjectNode::tick()
     return BT::NodeStatus::FAILURE;
   }
 
+  // arm_->setNamedTarget("home");  
+  // moveit::planning_interface::MoveGroupInterface::Plan home_plan;
+  // if (arm_->plan(home_plan) != moveit::core::MoveItErrorCode::SUCCESS) 
+  // {
+  //   RCLCPP_ERROR(node_->get_logger(), "MoveIt planning failed for HOME (named target)");
+  //   return BT::NodeStatus::FAILURE;
+  // }
+  // if (arm_->execute(home_plan) != moveit::core::MoveItErrorCode::SUCCESS) {
+  //   RCLCPP_ERROR(node_->get_logger(), "MoveIt execution failed for HOME (named target)");
+  //   return BT::NodeStatus::FAILURE;
+  // }
+
+std::map<std::string, double> home_joints;
+home_joints["panda_joint1"] = 0.0;
+home_joints["panda_joint2"] = 0.0;
+home_joints["panda_joint3"] = 0.0;
+home_joints["panda_joint4"] = -1.571;
+home_joints["panda_joint5"] = 0.0;
+home_joints["panda_joint6"] = 1.571;
+home_joints["panda_joint7"] = 0.0;
+
+arm_->setJointValueTarget(home_joints);
+
+moveit::planning_interface::MoveGroupInterface::Plan home_plan;
+if (arm_->plan(home_plan) != moveit::core::MoveItErrorCode::SUCCESS) {
+  RCLCPP_ERROR(node_->get_logger(), "MoveIt planning failed for HOME (joint target)");
+  return BT::NodeStatus::FAILURE;
+}
+if (arm_->execute(home_plan) != moveit::core::MoveItErrorCode::SUCCESS) {
+  RCLCPP_ERROR(node_->get_logger(), "MoveIt execution failed for HOME (joint target)");
+  return BT::NodeStatus::FAILURE;
+}
+
+
+
   geometry_msgs::msg::Pose object_pose_w;
   geometry_msgs::msg::Pose base_pose_w;
 
@@ -123,6 +159,19 @@ BT::NodeStatus PickObjectNode::tick()
   try 
   {
     T_base_arm = tf_buffer_->lookupTransform(kBaseLink, kArmBase, tf2::TimePointZero);   // TimePointZero = latest available
+    RCLCPP_INFO(
+      node_->get_logger(),
+      "T_base_arm:\n"
+      "  translation: [x=%.3f, y=%.3f, z=%.3f]\n"
+      "  rotation (quat): [x=%.3f, y=%.3f, z=%.3f, w=%.3f]",
+      T_base_arm.transform.translation.x,
+      T_base_arm.transform.translation.y,
+      T_base_arm.transform.translation.z,
+      T_base_arm.transform.rotation.x,
+      T_base_arm.transform.rotation.y,
+      T_base_arm.transform.rotation.z,
+      T_base_arm.transform.rotation.w
+    );
   } 
   catch (const tf2::TransformException& ex) 
   {
@@ -190,9 +239,9 @@ BT::NodeStatus PickObjectNode::tick()
     tgt.pose.position.x = p_obj.x();
     tgt.pose.position.y = p_obj.y();
     tgt.pose.position.z = p_obj.z() + z_offset;
-    // tgt.pose.position.x = 0.3;
-    // tgt.pose.position.y = 0.3;
-    // tgt.pose.position.z = 0.3;
+    // tgt.pose.position.x = 0.5;
+    // tgt.pose.position.y = 0.0;
+    // tgt.pose.position.z = 0.6;
 
     tgt.pose.orientation = ee_q;
     return tgt;
@@ -230,7 +279,7 @@ BT::NodeStatus PickObjectNode::tick()
     return BT::NodeStatus::FAILURE;
   }
 
-  // Close gripper (physics-only grasp)
+  // Close gripper 
   if (!closeGripper(kCloseWidth, kCloseEffort)) {
     RCLCPP_WARN(node_->get_logger(), "Gripper close reported failure; continuing anyway (physics-only may still work)");
   }
@@ -238,6 +287,18 @@ BT::NodeStatus PickObjectNode::tick()
   if (!go(lift, "lift")) {
     return BT::NodeStatus::FAILURE;
   }
+
+
+  arm_->setJointValueTarget(home_joints);
+  if (arm_->plan(home_plan) != moveit::core::MoveItErrorCode::SUCCESS) {
+    RCLCPP_ERROR(node_->get_logger(), "MoveIt planning failed for HOME (joint target)");
+    return BT::NodeStatus::FAILURE;
+  }
+  if (arm_->execute(home_plan) != moveit::core::MoveItErrorCode::SUCCESS) {
+    RCLCPP_ERROR(node_->get_logger(), "MoveIt execution failed for HOME (joint target)");
+    return BT::NodeStatus::FAILURE;
+  }
+
 
   RCLCPP_INFO(node_->get_logger(), "PickObjectNode: SUCCESS");
   return BT::NodeStatus::SUCCESS;
