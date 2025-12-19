@@ -47,9 +47,9 @@ int main(int argc, char ** argv)
   const std::string pkg_share = ament_index_cpp::get_package_share_directory("mobile_manipulator_tasks");
   // const std::string xml_path = pkg_share + "/bt_xml/test_get_next_object.xml";
   // const std::string xml_path = pkg_share + "/bt_xml/test_go_to_object.xml";
-  const std::string xml_path = pkg_share + "/bt_xml/go_to_object_nav.xml";
+  // const std::string xml_path = pkg_share + "/bt_xml/go_to_object_nav.xml";
   // const std::string xml_path = pkg_share + "/bt_xml/test_get_gz_pose.xml";
-
+  const std::string xml_path = pkg_share + "/bt_xml/main_bt.xml";
 
   std::cout << "Loading BT XML: " << xml_path << std::endl;
   auto tree = factory.createTreeFromFile(xml_path);

@@ -1,0 +1,22 @@
+<root main_tree_to_execute="MainTree" BTCPP_format="4">
+  <BehaviorTree ID="MainTree">
+    <Sequence>
+
+      <!-- 1) Get next object from spawner -->
+      <GetNextObject target_name="{obj_name}" target_pose="{obj_pose}" target_color="{obj_color}" />
+
+      <!-- 2) Compute base goal from object pose -->
+      <ComputeBaseGoalFromObject object_pose="{obj_pose}" nav_goal="{nav_goal}" />
+
+      <!-- 3) Use Nav2 via NavigateToPoseBT -->
+      <NavigateToPoseBT goal="{nav_goal}" />
+
+      <!-- 4) (Will be perception node) Get position of base -->
+      <GetPoseGroundTruth model_pose="{sonny_pose}" />
+
+      <!-- 5) Pick object with moveit2 -->
+      <PickObjectNode object_pose="{obj_pose}" base_pose="{sonny_pose}" />
+
+    </Sequence>
+  </BehaviorTree>
+</root>

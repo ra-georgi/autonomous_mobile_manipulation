@@ -10,10 +10,9 @@ namespace mobile_manipulator_tasks
 GetNextObjectBTNode::GetNextObjectBTNode(const std::string& name, const BT::NodeConfiguration& config): SyncActionNode(name, config)
 {
   node_ = rclcpp::Node::make_shared("get_next_object_bt_node");
-
   client_ = node_->create_client<mobile_manipulator_tasks::srv::GetNextObject>("get_next_object");
-
-  while (!client_->wait_for_service(std::chrono::seconds(1))) {
+  while (!client_->wait_for_service(std::chrono::seconds(1))) 
+  {
     RCLCPP_WARN(node_->get_logger(), "Waiting for /get_next_object service...");
   }
 }
@@ -22,7 +21,8 @@ BT::PortsList GetNextObjectBTNode::providedPorts()
 {
   return {
       BT::OutputPort<std::string>("target_name"),
-      BT::OutputPort<geometry_msgs::msg::Pose>("target_pose")
+      BT::OutputPort<geometry_msgs::msg::Pose>("target_pose"),
+      BT::OutputPort<std::string>("target_color"),
   };
 }
 
@@ -35,8 +35,7 @@ BT::NodeStatus GetNextObjectBTNode::tick()
 
   // 1) Make sure the service is available
   if (!client_->wait_for_service(500ms)) {
-    RCLCPP_WARN(node_->get_logger(),
-                "Service /get_next_object not available");
+    RCLCPP_WARN(node_->get_logger(), "Service /get_next_object not available");
     return BT::NodeStatus::FAILURE;
   }
 
@@ -66,8 +65,9 @@ BT::NodeStatus GetNextObjectBTNode::tick()
   }
 
   // 6) Write values to blackboard
-  setOutput("target_name", response->object.name);
-  setOutput("target_pose", response->object.pose);
+  setOutput("target_name",  response->object.name);
+  setOutput("target_pose",  response->object.pose);
+  setOutput("target_color", response->object.color);
 
   return BT::NodeStatus::SUCCESS;
 }

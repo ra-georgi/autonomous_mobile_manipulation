@@ -29,7 +29,6 @@ private:
   static constexpr const char* kArmGroup = "panda_arm";
   static constexpr const char* kEeLink   = "panda_hand";
 
-  // These must match your robot frames in TF/URDF
   static constexpr const char* kBaseLink = "base_link";
   // static constexpr const char* kArmBase  = "panda_link0";  
   static constexpr const char* kArmBase  = "base_link";
