@@ -32,7 +32,7 @@ private:
   static constexpr double kVelScale = 0.3;
   static constexpr double kAccScale = 0.3;
 
-  static constexpr double kOpenWidth  = 0.03;  // Panda fingers open width (meters). Adjust if needed.
+  static constexpr double kOpenWidth  = 0.04;  // Panda fingers open width (meters)
   static constexpr double kOpenEffort = 10.0;
 
   rclcpp::Node::SharedPtr node_;

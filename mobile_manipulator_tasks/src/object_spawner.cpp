@@ -52,50 +52,50 @@ ObjectSpawnerNode::ObjectSpawnerNode(const rclcpp::NodeOptions & options): rclcp
     schedule_.push_back(e1);
   }
 
-  // {
-  //   SpawnEvent e2;
-  //   e2.spawn_time = 40.0;           
-  //   e2.color      = "green";
-  //   e2.name       = "cyl_green_2";
-  //   e2.pose.position.x = 1.0;
-  //   e2.pose.position.y = -1.0;
-  //   e2.pose.position.z = 0.56;
-  //   e2.pose.orientation.x = 0.0;
-  //   e2.pose.orientation.y = 0.0;
-  //   e2.pose.orientation.z = 0.0;
-  //   e2.pose.orientation.w = 1.0;
-  //   schedule_.push_back(e2);
-  // }
+  {
+    SpawnEvent e2;
+    e2.spawn_time = 30.0;           
+    e2.color      = "green";
+    e2.name       = "cyl_green_2";
+    e2.pose.position.x = 0.8;
+    e2.pose.position.y = -1.0;
+    e2.pose.position.z = 0.56;
+    e2.pose.orientation.x = 0.0;
+    e2.pose.orientation.y = 0.0;
+    e2.pose.orientation.z = 0.0;
+    e2.pose.orientation.w = 1.0;
+    schedule_.push_back(e2);
+  }
 
-  // {
-  //   SpawnEvent e3;
-  //   e3.spawn_time = 50.0;           
-  //   e3.color      = "red";
-  //   e3.name       = "cyl_red_1";
-  //   e3.pose.position.x = -1.5;
-  //   e3.pose.position.y = 1.5;
-  //   e3.pose.position.z = 0.56;
-  //   e3.pose.orientation.x = 0.0;
-  //   e3.pose.orientation.y = 0.0;
-  //   e3.pose.orientation.z = 0.0;
-  //   e3.pose.orientation.w = 1.0;
-  //   schedule_.push_back(e3);
-  // }
+  {
+    SpawnEvent e3;
+    e3.spawn_time = 50.0;           
+    e3.color      = "red";
+    e3.name       = "cyl_red_1";
+    e3.pose.position.x = -1.7;
+    e3.pose.position.y = 1.5;
+    e3.pose.position.z = 0.56;
+    e3.pose.orientation.x = 0.0;
+    e3.pose.orientation.y = 0.0;
+    e3.pose.orientation.z = 0.0;
+    e3.pose.orientation.w = 1.0;
+    schedule_.push_back(e3);
+  }
 
-  // {
-  //   SpawnEvent e4;
-  //   e4.spawn_time = 60.0;           
-  //   e4.color      = "green";
-  //   e4.name       = "cyl_green_3";
-  //   e4.pose.position.x = -1.5;
-  //   e4.pose.position.y = -1.5;
-  //   e4.pose.position.z = 0.56;
-  //   e4.pose.orientation.x = 0.0;
-  //   e4.pose.orientation.y = 0.0;
-  //   e4.pose.orientation.z = 0.0;
-  //   e4.pose.orientation.w = 1.0;
-  //   schedule_.push_back(e4);
-  // }
+  {
+    SpawnEvent e4;
+    e4.spawn_time = 70.0;           
+    e4.color      = "green";
+    e4.name       = "cyl_green_3";
+    e4.pose.position.x = -1.7;
+    e4.pose.position.y = -1.5;
+    e4.pose.position.z = 0.56;
+    e4.pose.orientation.x = 0.0;
+    e4.pose.orientation.y = 0.0;
+    e4.pose.orientation.z = 0.0;
+    e4.pose.orientation.w = 1.0;
+    schedule_.push_back(e4);
+  }
 
 
   // Timer: check schedule at 10 Hz

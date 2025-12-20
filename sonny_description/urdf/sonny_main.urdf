@@ -616,7 +616,9 @@
     </joint>
     <joint name="panda_joint4">
       <command_interface name="position"/>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">-1.57</param>
+      </state_interface>
       <state_interface name="velocity"/>
     </joint>
     <joint name="panda_joint5">

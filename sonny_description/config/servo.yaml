@@ -1,0 +1,23 @@
+/**:
+  ros__parameters:
+    use_sim_time: true
+
+    # REQUIRED
+    move_group_name: "panda_arm"
+
+    # Input / output
+    command_in_type: "twist"
+    command_out_topic: "/panda_arm_controller/joint_trajectory"
+    joint_topic: "/joint_states"
+
+    # Frames (must exist in TF)
+    planning_frame: "panda_link0"
+    ee_frame_name: "panda_hand"
+
+    # Timing
+    publish_period: 0.01
+    incoming_command_timeout: 0.1
+
+    scale:
+      linear: 0.2
+      angular: 0.5

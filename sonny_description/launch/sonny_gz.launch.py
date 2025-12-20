@@ -10,6 +10,7 @@ from ros_gz_bridge.actions import RosGzBridge
 from ros_gz_sim.actions import GzServer
 
 from moveit_configs_utils import MoveItConfigsBuilder
+from launch.substitutions import PathJoinSubstitution
 
 def generate_launch_description():
     pkg_share = get_package_share_directory('sonny_description')
@@ -121,7 +122,7 @@ def generate_launch_description():
         .robot_description(file_path=urdf_file
         )
         .trajectory_execution(file_path="config/moveit_controllers.yaml")
-        # .kinematics(file_path="config/kinematics.yaml")  # Add this line
+        # .robot_description_kinematics(file_path="config/kinematics.yaml")  # Add this line
         .planning_scene_monitor(
             publish_robot_description=True, publish_robot_description_semantic=True
         )
@@ -140,6 +141,21 @@ def generate_launch_description():
         # parameters=[moveit_config.to_dict(),{'use_sim_time': use_sim_time,}],
     )    
 
+    # servo_params = PathJoinSubstitution([pkg_share, "config", "servo.yaml"])   
+
+    # servo_node = Node(
+    #     package="moveit_servo",
+    #     executable="servo_node",
+    #     output="screen",
+    #     parameters=[
+    #         moveit_config.to_dict(),
+    #         servo_params,
+    #         {"use_sim_time": True},
+    #     ],
+    # )
+
+
+
 
     return LaunchDescription([
         DeclareLaunchArgument(name='use_sim_time', default_value='True', description='Flag to enable use_sim_time'),
@@ -155,5 +171,6 @@ def generate_launch_description():
         joint_state_broadcaster_spawner,
         panda_arm_controller_spawner,
         panda_hand_controller_spawner,        
-        run_move_group_node
+        run_move_group_node,
+        # servo_node,
     ])

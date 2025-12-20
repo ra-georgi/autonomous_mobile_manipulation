@@ -126,7 +126,7 @@ home_joints["panda_joint3"] = 0.0;
 home_joints["panda_joint4"] = -1.571;
 home_joints["panda_joint5"] = 0.0;
 home_joints["panda_joint6"] = 1.571;
-home_joints["panda_joint7"] = 0.0;
+home_joints["panda_joint7"] = 0.785398;
 
 arm_->setJointValueTarget(home_joints);
 

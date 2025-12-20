@@ -38,7 +38,7 @@ private:
 
   // Motion parameters
   static constexpr double kPreZ   = 0.21;  // meters above object
-  static constexpr double kGraspZ = 0.12;  // meters above object when closing
+  static constexpr double kGraspZ = 0.135;  // meters above object when closing
   static constexpr double kLiftZ  = 0.21;  // meters above object after lift
 
   static constexpr double kVelScale = 0.3;

@@ -197,11 +197,14 @@ endif()
 # Export as BT plugin
 target_compile_definitions(get_gazebo_model_pose_bt_node PRIVATE BT_PLUGIN_EXPORT)
 
+
+
+
+
 install(TARGETS
   get_gazebo_model_pose_bt_node
   DESTINATION lib/${PROJECT_NAME}
 )
-
 
 
 
@@ -231,6 +234,24 @@ install(TARGETS
 
 
 
+add_library(place_object_bt_node SHARED
+  src/bt_nodes/place_object_bt_node.cpp
+)
+
+ament_target_dependencies(place_object_bt_node
+  behaviortree_cpp
+  rclcpp
+  rclcpp_action
+  control_msgs
+  moveit_ros_planning_interface
+)
+
+target_compile_definitions(place_object_bt_node PRIVATE BT_PLUGIN_EXPORT)
+
+install(TARGETS
+  place_object_bt_node
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 
 

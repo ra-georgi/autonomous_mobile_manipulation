@@ -17,6 +17,9 @@
       <!-- 5) Pick object with moveit2 -->
       <PickObjectNode object_pose="{obj_pose}" base_pose="{sonny_pose}" />
 
+      <!-- 6) Place object with moveit2 -->
+      <PlaceObjectNode object_color="{obj_color}" />
+
     </Sequence>
   </BehaviorTree>
 </root>

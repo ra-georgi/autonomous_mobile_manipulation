@@ -43,6 +43,9 @@ int main(int argc, char ** argv)
   const std::string pick_obj_plugin = pkg_prefix + "/lib/mobile_manipulator_tasks/libpick_object_bt_node.so";
   factory.registerFromPlugin(pick_obj_plugin);
 
+  const std::string place_obj_plugin = pkg_prefix + "/lib/mobile_manipulator_tasks/libplace_object_bt_node.so";
+  factory.registerFromPlugin(place_obj_plugin);
+
   // 3) Load XML tree from share dir
   const std::string pkg_share = ament_index_cpp::get_package_share_directory("mobile_manipulator_tasks");
   // const std::string xml_path = pkg_share + "/bt_xml/test_get_next_object.xml";

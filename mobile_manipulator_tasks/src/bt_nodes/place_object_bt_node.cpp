@@ -89,23 +89,23 @@ BT::NodeStatus PlaceObjectNode::tick()
   }
 
   const std::map<std::string, double> place_red = {
-    {"panda_joint1",  0.2},
-    {"panda_joint2", -0.9},
+    {"panda_joint1",  -2.35619},
+    {"panda_joint2", -1.09956},
     {"panda_joint3",  0.0},
-    {"panda_joint4", -2.0},
+    {"panda_joint4", -2.63545},
     {"panda_joint5",  0.0},
-    {"panda_joint6",  1.4},
-    {"panda_joint7",  0.8},
+    {"panda_joint6",  1.5708},
+    {"panda_joint7",  0.785398},
   };
 
   const std::map<std::string, double> place_green = {
-    {"panda_joint1", -0.2},
-    {"panda_joint2", -0.9},
+    {"panda_joint1",  2.35619},
+    {"panda_joint2", -1.09956},
     {"panda_joint3",  0.0},
-    {"panda_joint4", -2.0},
+    {"panda_joint4", -2.63545},
     {"panda_joint5",  0.0},
-    {"panda_joint6",  1.4},
-    {"panda_joint7",  0.8},
+    {"panda_joint6",  1.5708},
+    {"panda_joint7",  0.785398},
   };
 
   const std::map<std::string, double>& target = (color == "red") ? place_red : place_green;
@@ -130,13 +130,38 @@ BT::NodeStatus PlaceObjectNode::tick()
     RCLCPP_WARN(node_->get_logger(), "Gripper open failed; continuing (object may still drop)");
   }
 
+
+
+  std::map<std::string, double> home_joints;
+  home_joints["panda_joint1"] = 0.0;
+  home_joints["panda_joint2"] = 0.0;
+  home_joints["panda_joint3"] = 0.0;
+  home_joints["panda_joint4"] = -1.571;
+  home_joints["panda_joint5"] = 0.0;
+  home_joints["panda_joint6"] = 1.571;
+  home_joints["panda_joint7"] = 0.785398;
+
+  arm_->setJointValueTarget(home_joints);
+
+  moveit::planning_interface::MoveGroupInterface::Plan home_plan;
+  if (arm_->plan(home_plan) != moveit::core::MoveItErrorCode::SUCCESS) {
+    RCLCPP_ERROR(node_->get_logger(), "MoveIt planning failed for HOME (joint target)");
+    return BT::NodeStatus::FAILURE;
+  }
+  if (arm_->execute(home_plan) != moveit::core::MoveItErrorCode::SUCCESS) {
+    RCLCPP_ERROR(node_->get_logger(), "MoveIt execution failed for HOME (joint target)");
+    return BT::NodeStatus::FAILURE;
+  }
+
+
+
   RCLCPP_INFO(node_->get_logger(), "PlaceObjectNode: SUCCESS");
   return BT::NodeStatus::SUCCESS;
 }
 
-}  // namespace mobile_manipulator_tasks
+}  
 
 BT_REGISTER_NODES(factory)
 {
-  factory.registerNodeType<mobile_manipulator_tasks::PlaceObjectNode>("PlaceObject");
+  factory.registerNodeType<mobile_manipulator_tasks::PlaceObjectNode>("PlaceObjectNode");
 }
